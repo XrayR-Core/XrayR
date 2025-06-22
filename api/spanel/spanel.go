@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/XrayR-project/XrayR/api"
+	"github.com/XrayR-Core/XrayR/api"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 )
@@ -136,6 +136,7 @@ func (c *APIClient) parseShadowsocksConfig(config *Shadowsocks) (*api.NodeInfo, 
 		NodeID:            c.ServerID,
 		Port:              uint32(config.Port),
 		CypherMethod:      config.Method,
+		ServerKey:         config.ServerKey,
 	}, nil
 }
 

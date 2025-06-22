@@ -893,6 +893,7 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 		Header:            nodeConfig.Header,
 		EnableREALITY:     nodeConfig.EnableREALITY,
 		REALITYConfig:     realityConfig,
+<<<<<<< HEAD
 
 		// Hy2 fields (zero-valued for non-Hy2 nodes)
 		UpMbps:        upMbps,
@@ -900,6 +901,9 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 		Obfs:          hy2Obfs,
 		ObfsPassword:  hy2ObfsPass,
 		Hy2Masquerade: hy2Masq,
+=======
+		ServerKey:         nodeConfig.ServerKey,
+>>>>>>> 3a997730 (Fix Shadowsocks-2022 no working)
 	}
 
 	return nodeInfo, nil
