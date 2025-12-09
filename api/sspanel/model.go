@@ -35,6 +35,7 @@ type CustomConfig struct {
 	EnableREALITY  bool            `json:"enable_reality"`
 	RealityOpts    *REALITYConfig  `json:"reality-opts"`
 <<<<<<< HEAD
+<<<<<<< HEAD
 	// Hy2Opts bundles Hysteria 2-specific knobs; non-nil only for sort=15 nodes.
 	Hy2Opts *Hy2OptsStruct `json:"Hy2Opts,omitempty"`
 }
@@ -63,6 +64,8 @@ type Hy2MasqueradeOpts struct {
 =======
 	ServerKey      string          `json:"server_key"`
 >>>>>>> 3a997730 (Fix Shadowsocks-2022 no working)
+=======
+>>>>>>> c800d17b (refactor: remove Duplicate config item)
 }
 
 // UserResponse is the response of user

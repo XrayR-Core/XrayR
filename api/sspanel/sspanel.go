@@ -894,6 +894,7 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 		EnableREALITY:     nodeConfig.EnableREALITY,
 		REALITYConfig:     realityConfig,
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 		// Hy2 fields (zero-valued for non-Hy2 nodes)
 		UpMbps:        upMbps,
@@ -904,6 +905,8 @@ func (c *APIClient) ParseSSPanelNodeInfo(nodeInfoResponse *NodeInfoResponse) (*a
 =======
 		ServerKey:         nodeConfig.ServerKey,
 >>>>>>> 3a997730 (Fix Shadowsocks-2022 no working)
+=======
+>>>>>>> c800d17b (refactor: remove Duplicate config item)
 	}
 
 	return nodeInfo, nil
