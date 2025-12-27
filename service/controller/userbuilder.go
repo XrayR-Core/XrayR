@@ -188,7 +188,7 @@ func cipherFromString(c string) shadowsocks.CipherType {
 
 func (c *Controller) buildUserTag(user *api.UserInfo) string {
 	tag := fmt.Sprintf("%s|%s|%d", c.Tag, user.Email, user.UID)
-	errors.LogDebug(context.Background(), "Generated user tag: ", tag)
+	errors.LogInfo(context.Background(), "Generated user tag: ", tag)
 	return tag
 }
 
