@@ -3,7 +3,7 @@ package spanel
 import (
 	"testing"
 
-	"github.com/XrayR-project/XrayR/api"
+	"github.com/XrayR-Core/XrayR/api"
 )
 
 func CreateClient() api.API {
