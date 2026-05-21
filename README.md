@@ -2,108 +2,104 @@
 
 [![](https://img.shields.io/badge/TgChat-@XrayR讨论-blue.svg)](https://t.me/XrayR_project)
 [![](https://img.shields.io/badge/Channel-@XrayR通知-blue.svg)](https://t.me/XrayR_channel)
-![](https://img.shields.io/github/stars/XrayR-project/XrayR)
-![](https://img.shields.io/github/forks/XrayR-project/XrayR)
-![](https://github.com/XrayR-project/XrayR/actions/workflows/release.yml/badge.svg)
-![](https://github.com/XrayR-project/XrayR/actions/workflows/docker.yml/badge.svg)
-[![Github All Releases](https://img.shields.io/github/downloads/XrayR-project/XrayR/total.svg)]()
+![](https://img.shields.io/github/stars/XrayR-Core/XrayR)
+![](https://img.shields.io/github/forks/XrayR-Core/XrayR)
+![](https://github.com/XrayR-Core/XrayR/actions/workflows/release.yml/badge.svg)
+![](https://github.com/XrayR-Core/XrayR/actions/workflows/docker.yml/badge.svg)
+[![GitHub All Releases](https://img.shields.io/github/downloads/XrayR-Core/XrayR/total.svg)]()
 
+[Chinese](./README-cn.md) | [English](./README-en.md) | [Iranian (Farsi)](./README_Fa.md) | [Vietnamese](./README-vi.md)
 
-[English](https://github.com/XrayR-project/XrayR/blob/master/README-en.md)|[Iranian](https://github.com/XrayR-project/XrayR/blob/master/README_Fa.md)|[Vietnamese](https://github.com/XrayR-project/XrayR/blob/master/README-vi.md)
+XrayR is a backend framework built on Xray-core that supports V2Ray, Trojan, and Shadowsocks protocols. It is easy to extend and supports integration with multiple panel systems.
 
-A Xray backend framework that can easily support many panels.
+If you find this project useful, please consider giving it a `star` and `watch`.
 
-一个基于Xray的后端框架，支持V2ay,Trojan,Shadowsocks协议，极易扩展，支持多面板对接。
+## Documentation
 
-如果您喜欢本项目，可以右上角点个star+watch，持续关注本项目的进展。
+Detailed guide: [XrayR Documentation](https://xrayr-project.github.io/XrayR-doc/)
 
-使用教程：[详细使用教程](https://xrayr-project.github.io/XrayR-doc/)
+## Disclaimer
 
+This project is maintained as a personal learning and development effort. No warranty is provided. The author is not responsible for any consequences caused by using this software.
 
-## 免责声明
+## Features
 
-本项目只是本人个人学习开发并维护，本人不保证任何可用性，也不对使用本软件造成的任何后果负责。
+- Fully open-source and free.
+- Supports multiple protocols: V2Ray, Trojan, and Shadowsocks.
+- Supports modern features such as VLESS and XTLS.
+- Supports multi-panel and multi-node integration in a single instance.
+- Supports online IP limit.
+- Supports both node-level and user-level rate limiting.
+- Simple and clear configuration.
+- Automatically restarts after configuration changes.
+- Easy to build and upgrade, with fast Xray-core updates.
 
-## 特点
+## Capability Matrix
 
-* 永久开源且免费。
-* 支持V2ray，Trojan， Shadowsocks多种协议。
-* 支持Vless和XTLS等新特性。
-* 支持单实例对接多面板、多节点，无需重复启动。
-* 支持限制在线IP
-* 支持节点端口级别、用户级别限速。
-* 配置简单明了。
-* 修改配置自动重启实例。
-* 方便编译和升级，可以快速更新核心版本， 支持Xray-core新特性。
+| Capability | V2Ray | Trojan | Shadowsocks |
+|---|---|---|---|
+| Fetch node information | √ | √ | √ |
+| Fetch user information | √ | √ | √ |
+| User traffic statistics | √ | √ | √ |
+| Report server information | √ | √ | √ |
+| Auto-issue TLS certificates | √ | √ | √ |
+| Auto-renew TLS certificates | √ | √ | √ |
+| Online user counting | √ | √ | √ |
+| Online user limits | √ | √ | √ |
+| Audit rules | √ | √ | √ |
+| Node port rate limiting | √ | √ | √ |
+| User-level rate limiting | √ | √ | √ |
+| Custom DNS | √ | √ | √ |
 
-## 功能介绍
+## Supported Panels
 
-| 功能        | v2ray | trojan | shadowsocks |
-|-----------|-------|--------|-------------|
-| 获取节点信息    | √     | √      | √           |
-| 获取用户信息    | √     | √      | √           |
-| 用户流量统计    | √     | √      | √           |
-| 服务器信息上报   | √     | √      | √           |
-| 自动申请tls证书 | √     | √      | √           |
-| 自动续签tls证书 | √     | √      | √           |
-| 在线人数统计    | √     | √      | √           |
-| 在线用户限制    | √     | √      | √           |
-| 审计规则      | √     | √      | √           |
-| 节点端口限速    | √     | √      | √           |
-| 按照用户限速    | √     | √      | √           |
-| 自定义DNS    | √     | √      | √           |
+| Panel | V2Ray | Trojan | Shadowsocks |
+|---|---|---|---|
+| sspanel-uim | √ | √ | √ (single-port multi-user and V2Ray-Plugin) |
+| v2board | √ | √ | √ |
+| [PMPanel](https://github.com/ByteInternetHK/PMPanel) | √ | √ | √ |
+| [ProxyPanel](https://github.com/ProxyPanel/ProxyPanel) | √ | √ | √ |
+| [WHMCS (V2RaySocks)](https://v2raysocks.doxtex.com/) | √ | √ | √ |
+| [GoV2Panel](https://github.com/pingProMax/gov2panel) | √ | √ | √ |
+| [BunPanel](https://github.com/pennyMorant/bunpanel-release) | √ | √ | √ |
 
-## 支持前端
+## Installation
 
-| 前端                                                     | v2ray | trojan | shadowsocks             |
-|--------------------------------------------------------|-------|--------|-------------------------|
-| sspanel-uim                                            | √     | √      | √ (单端口多用户和V2ray-Plugin) |
-| v2board                                                | √     | √      | √                       |
-| [PMPanel](https://github.com/ByteInternetHK/PMPanel)   | √     | √      | √                       |
-| [ProxyPanel](https://github.com/ProxyPanel/ProxyPanel) | √     | √      | √                       |
-| [WHMCS (V2RaySocks)](https://v2raysocks.doxtex.com/)   | √     | √      | √                       |
-| [GoV2Panel](https://github.com/pingProMax/gov2panel)   | √     | √      | √                       |
-| [BunPanel](https://github.com/pennyMorant/bunpanel-release)   | √     | √      | √                       |
+### One-click install
 
-## 软件安装
-
-### 一键安装
-
-```
-wget -N https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/install.sh && bash install.sh
+```bash
+wget -N https://raw.githubusercontent.com/XrayR-Core/XrayR-release/master/install.sh && bash install.sh
 ```
 
-### 使用Docker部署软件
+### Docker
 
-[Docker部署教程](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
+[Docker deployment tutorial](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
 
-### 手动安装
+### Manual install
 
-[手动安装教程](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
+[Manual installation tutorial](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
 
-## 配置文件及详细使用教程
+## Configuration and Usage
 
-[详细使用教程](https://xrayr-project.github.io/XrayR-doc/)
+[Detailed tutorial](https://xrayr-project.github.io/XrayR-doc/)
 
-## Thanks
+## Acknowledgements
 
-* [Project X](https://github.com/XTLS/)
-* [V2Fly](https://github.com/v2fly)
-* [VNet-V2ray](https://github.com/ProxyPanel/VNet-V2ray)
-* [Air-Universe](https://github.com/crossfw/Air-Universe)
+- [Project X](https://github.com/XTLS/)
+- [V2Fly](https://github.com/v2fly)
+- [VNet-V2ray](https://github.com/ProxyPanel/VNet-V2ray)
+- [Air-Universe](https://github.com/crossfw/Air-Universe)
 
-## Licence
+## License
 
-[Mozilla Public License Version 2.0](https://github.com/XrayR-project/XrayR/blob/master/LICENSE)
+[Mozilla Public License Version 2.0](./LICENSE)
 
-## Telgram
+## Telegram
 
-[XrayR后端讨论](https://t.me/XrayR_project)
+[XrayR Discussion Group](https://t.me/XrayR_project)
 
-[XrayR通知](https://t.me/XrayR_channel)
+[XrayR Channel](https://t.me/XrayR_channel)
 
-## Stargazers over time
+## Stargazers Over Time
 
-[![Stargazers over time](https://starchart.cc/XrayR-project/XrayR.svg)](https://starchart.cc/XrayR-project/XrayR)
-
-
+[![Stargazers over time](https://starchart.cc/XrayR-Core/XrayR.svg)](https://starchart.cc/XrayR-Core/XrayR)
