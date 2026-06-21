@@ -12,7 +12,6 @@ import (
 	"github.com/xtls/xray-core/common/protocol"
 	"github.com/xtls/xray-core/common/serial"
 	"github.com/xtls/xray-core/infra/conf"
-	hy2_account "github.com/xtls/xray-core/proxy/hysteria/account"
 	"github.com/xtls/xray-core/proxy/shadowsocks"
 	"github.com/xtls/xray-core/proxy/shadowsocks_2022"
 	"github.com/xtls/xray-core/proxy/trojan"
@@ -56,32 +55,6 @@ func (c *Controller) buildVlessUser(userInfo *[]api.UserInfo) (users []*protocol
 			Email:   c.buildUserTag(&user),
 			Account: serial.ToTypedMessage(vlessAccount),
 		}
-	}
-	return users
-}
-
-// buildHysteria2User builds Hysteria 2 users. Auth is user.Passwd (single string).
-// Email follows the shared buildUserTag format so the rate limiter composite key
-// (tag|email|uid) matches what common/limiter.GetUserBucket expects.
-//
-// Note: if two users share the same Passwd (panel-side collision), Xray-core's
-// Validator will register both MemoryAccounts with distinct Emails but match the
-// first-inserted on auth lookup, silently attributing traffic to one user. The
-// controller's addNewUser path filters duplicates upstream of this builder (R10).
-func (c *Controller) buildHysteria2User(userInfo *[]api.UserInfo) (users []*protocol.User) {
-	users = make([]*protocol.User, 0, len(*userInfo))
-	for _, user := range *userInfo {
-		if user.Passwd == "" {
-			errors.LogError(context.Background(), "[UID: %d] Hysteria2 user has empty passwd; skipping", user.UID)
-			continue
-		}
-		users = append(users, &protocol.User{
-			Level: 0,
-			Email: c.buildUserTag(&user),
-			Account: serial.ToTypedMessage(&hy2_account.Account{
-				Auth: user.Passwd,
-			}),
-		})
 	}
 	return users
 }
@@ -179,19 +152,17 @@ func cipherFromString(c string) shadowsocks.CipherType {
 		return shadowsocks.CipherType_AES_256_GCM
 	case "chacha20-poly1305", "aead_chacha20_poly1305", "chacha20-ietf-poly1305":
 		return shadowsocks.CipherType_CHACHA20_POLY1305
-	// "none"/"plain" were removed upstream (XTLS/Xray-core#6303) and now
-	// fall through to UNKNOWN like any other unsupported cipher.
 	case "xchacha20-poly1305", "aead_xchacha20_poly1305", "xchacha20-ietf-poly1305":
 		return shadowsocks.CipherType_XCHACHA20_POLY1305
+	case "none", "plain":
+		return shadowsocks.CipherType_NONE
 	default:
 		return shadowsocks.CipherType_UNKNOWN
 	}
 }
 
 func (c *Controller) buildUserTag(user *api.UserInfo) string {
-	tag := fmt.Sprintf("%s|%s|%d", c.Tag, user.Email, user.UID)
-	errors.LogInfo(context.Background(), "Generated user tag: ", tag)
-	return tag
+	return fmt.Sprintf("%s|%s|%d", c.Tag, user.Email, user.UID)
 }
 
 func (c *Controller) checkShadowsocksPassword(password string, method string) (string, error) {
