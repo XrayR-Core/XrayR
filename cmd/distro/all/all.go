@@ -42,8 +42,6 @@ import (
 	_ "github.com/xtls/xray-core/proxy/vmess/outbound"
 	_ "github.com/xtls/xray-core/proxy/wireguard"
 
-<<<<<<< HEAD
-=======
 	// Transport headers (srtp, tls, utp, wechat, wireguard removed in Xray-core v1.260327.0;
 	// now handled via transport/internet/finalmask/mkcp)
 	_ "github.com/xtls/xray-core/transport/internet/headers/http"
@@ -52,8 +50,6 @@ import (
 	// taggedimpl fixes dependency cycle in internet package;
 	// required for tag-based outbound routing to function
 	_ "github.com/xtls/xray-core/transport/internet/tagged/taggedimpl"
-
->>>>>>> 4e9328f4 (fix: register taggedimpl to fix broken tag-based routing)
 	// Transports
 	_ "github.com/xtls/xray-core/transport/internet/grpc"
 	_ "github.com/xtls/xray-core/transport/internet/kcp"
