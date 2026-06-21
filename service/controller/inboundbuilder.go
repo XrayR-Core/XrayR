@@ -95,18 +95,6 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 		} else {
 			proxySetting = &conf.TrojanServerConfig{}
 		}
-	case "Hysteria2":
-		// Hysteria 2 protocol settings are minimal at the proxy layer —
-		// only Version + Users. Users are added later via AddUser per sync cycle.
-		// Bandwidth (BrutalUp/Down), obfuscation (Salamander), and masquerade
-		// live at the transport/finalmask layer, wired below in the stream
-		// settings block for networkType == "hysteria".
-		protocol = "hysteria"
-		proxySetting = &conf.HysteriaServerConfig{
-			Version: 2,
-			Users:   nil, // filled dynamically
-		}
-
 	case "Shadowsocks", "Shadowsocks-Plugin":
 		protocol = "shadowsocks"
 		cipher := strings.ToLower(nodeInfo.CypherMethod)
@@ -155,15 +143,6 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 
 	// Build streamSettings
 	streamSetting = new(conf.StreamConfig)
-
-	// Validate against removed transport protocols (Xray-core v1.260327.0+)
-	switch strings.ToLower(nodeInfo.TransportProtocol) {
-	case "h2", "h3", "http":
-		return nil, fmt.Errorf("transport protocol %q was removed in Xray-core; use splithttp/xhttp stream-one H2/H3 instead", nodeInfo.TransportProtocol)
-	case "quic":
-		return nil, fmt.Errorf("transport protocol %q was removed in Xray-core; use splithttp/xhttp stream-one H3 instead", nodeInfo.TransportProtocol)
-	}
-
 	transportProtocol := conf.TransportProtocol(nodeInfo.TransportProtocol)
 	networkType, err := transportProtocol.Build()
 	if err != nil {
@@ -179,6 +158,7 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 		streamSetting.TCPSettings = tcpSetting
 	case "websocket":
 		headers := make(map[string]string)
+		headers["Host"] = nodeInfo.Host
 		wsSettings := &conf.WebSocketConfig{
 			AcceptProxyProtocol: config.EnableProxyProtocol,
 			Host:                nodeInfo.Host,
@@ -207,9 +187,13 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 		}
 		streamSetting.SplitHTTPSettings = splithttpSetting
 	case "hysteria":
-		if err := buildHysteria2StreamSettings(streamSetting, nodeInfo); err != nil {
-			return nil, err
+		hysteriaSettings := &conf.HysteriaConfig{
+			Version: 2,
 		}
+		streamSetting.HysteriaSettings = hysteriaSettings
+	case "mkcp", "kcp":
+		kcpSettings := &conf.KCPConfig{}
+		streamSetting.KCPSettings = kcpSettings
 	}
 	streamSetting.Network = &transportProtocol
 
@@ -250,7 +234,7 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 		}
 	}
 
-	if !isREALITY && nodeInfo.EnableTLS && config.CertConfig != nil && config.CertConfig.CertMode != "none" {
+	if !isREALITY && nodeInfo.EnableTLS && config.CertConfig.CertMode != "none" {
 		streamSetting.Security = "tls"
 		certFile, keyFile, err := getCertFile(config.CertConfig)
 		if err != nil {
@@ -260,15 +244,6 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 			RejectUnknownSNI: config.CertConfig.RejectUnknownSni,
 		}
 		tlsSettings.Certs = append(tlsSettings.Certs, &conf.TLSCertConfig{CertFile: certFile, KeyFile: keyFile, OcspStapling: 3600})
-		// Hysteria 2 mandates ALPN "h3" in the QUIC handshake. Without this,
-		// xray-core's GetTLSConfig falls back to ["h2","http/1.1"], which has
-		// no overlap with what every Hy2 client offers — the server then
-		// answers the first Initial with a CRYPTO_ERROR / TLS alert 120
-		// (no_application_protocol) and the connection never establishes.
-		if networkType == "hysteria" {
-			alpn := conf.StringList{"h3"}
-			tlsSettings.ALPN = &alpn
-		}
 		streamSetting.TLSSettings = tlsSettings
 	}
 
@@ -282,100 +257,6 @@ func InboundBuilder(config *Config, nodeInfo *api.NodeInfo, tag string) (*core.I
 	inboundDetourConfig.StreamSetting = streamSetting
 
 	return inboundDetourConfig.Build()
-}
-
-// buildHysteria2StreamSettings wires the Hy2-specific transport + finalmask
-// blocks on a StreamConfig. Xray-core v26.x splits Hy2 config across three
-// places:
-//
-//   - StreamConfig.HysteriaSettings: transport-level (version, masquerade,
-//     udp_idle_timeout). Up/Down/Congestion/UdpHop fields on this struct are
-//     deprecated — we do not set them.
-//   - StreamConfig.FinalMask.QuicParams: BBR bandwidth (brutalUp/brutalDown)
-//   - congestion algo ("brutal"). The active location for bandwidth.
-//   - StreamConfig.FinalMask.Udp: Salamander obfuscation is registered as a
-//     UDP mask (type: "salamander"), not a direct FinalMask field.
-//
-// TLS settings are applied by the caller's shared TLS/REALITY block; we only
-// wire the hysteria-specific pieces here.
-func buildHysteria2StreamSettings(streamSetting *conf.StreamConfig, nodeInfo *api.NodeInfo) error {
-	// Transport layer: Version + Masquerade.
-	hyConfig := &conf.HysteriaConfig{
-		Version: 2,
-	}
-	if nodeInfo.Hy2Masquerade != nil {
-		m := nodeInfo.Hy2Masquerade
-		hyConfig.Masquerade = conf.Masquerade{
-			Type:        m.Type,
-			Url:         m.URL, // xray-core uses Url (not URL)
-			RewriteHost: m.RewriteHost,
-			Insecure:    m.Insecure,
-			Dir:         m.Dir,
-			Content:     m.Content,
-			StatusCode:  m.StatusCode,
-		}
-	} else {
-		// D4: safe default — masq_type "string" with 404 empty body.
-		// Does not emit outbound traffic (url mode would fetch remote).
-		hyConfig.Masquerade = conf.Masquerade{
-			Type:       "string",
-			StatusCode: 404,
-			Content:    "",
-		}
-	}
-	streamSetting.HysteriaSettings = hyConfig
-
-	// Finalmask: QuicParams (receive windows + bandwidth) + optional Salamander obfs.
-	finalMask := &conf.FinalMask{}
-
-	// QUIC receive windows: override xray-core's defaults (stream 8MiB /
-	// conn 20MiB) with larger values to better fill high-BDP links.
-	quicParams := &conf.QuicParamsConfig{
-		InitStreamReceiveWindow:     26843545,
-		MaxStreamReceiveWindow:      26843545,
-		InitConnectionReceiveWindow: 67108864,
-		MaxConnectionReceiveWindow:  67108864,
-	}
-
-	if nodeInfo.UpMbps > 0 || nodeInfo.DownMbps > 0 {
-		quicParams.Congestion = "brutal"
-		// Bandwidth is parsed from a string like "500 mbps"; the simplest
-		// robust path is to marshal via JSON. See conf.Bandwidth.UnmarshalJSON.
-		if nodeInfo.UpMbps > 0 {
-			if err := json.Unmarshal(
-				[]byte(fmt.Sprintf(`"%d mbps"`, nodeInfo.UpMbps)),
-				&quicParams.BrutalUp,
-			); err != nil {
-				return fmt.Errorf("Hysteria2: parse up_mbps=%d: %w", nodeInfo.UpMbps, err)
-			}
-		}
-		if nodeInfo.DownMbps > 0 {
-			if err := json.Unmarshal(
-				[]byte(fmt.Sprintf(`"%d mbps"`, nodeInfo.DownMbps)),
-				&quicParams.BrutalDown,
-			); err != nil {
-				return fmt.Errorf("Hysteria2: parse down_mbps=%d: %w", nodeInfo.DownMbps, err)
-			}
-		}
-	}
-	finalMask.QuicParams = quicParams
-
-	if nodeInfo.Obfs == "salamander" && nodeInfo.ObfsPassword != "" {
-		salaRaw := json.RawMessage(fmt.Sprintf(`{"password":%q}`, nodeInfo.ObfsPassword))
-		finalMask.Udp = []conf.Mask{
-			{
-				Type:     "salamander",
-				Settings: &salaRaw,
-			},
-		}
-	}
-
-	// Only attach finalmask if we actually configured something on it.
-	if finalMask.QuicParams != nil || len(finalMask.Udp) > 0 {
-		streamSetting.FinalMask = finalMask
-	}
-
-	return nil
 }
 
 func getCertFile(certConfig *mylego.CertConfig) (certFile string, keyFile string, err error) {
