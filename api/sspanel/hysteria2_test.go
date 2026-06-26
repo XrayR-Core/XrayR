@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/XrayR-project/XrayR/api"
+	"github.com/XrayR-Core/XrayR/api"
 )
 
 // newHy2APIClient returns a minimal APIClient configured for Hysteria2
