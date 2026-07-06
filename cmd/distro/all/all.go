@@ -55,11 +55,8 @@ import (
 	// Transport headers
 	_ "github.com/xtls/xray-core/transport/internet/headers/http"
 	_ "github.com/xtls/xray-core/transport/internet/headers/noop"
-	_ "github.com/xtls/xray-core/transport/internet/headers/srtp"
-	_ "github.com/xtls/xray-core/transport/internet/headers/tls"
-	_ "github.com/xtls/xray-core/transport/internet/headers/utp"
-	_ "github.com/xtls/xray-core/transport/internet/headers/wechat"
-	_ "github.com/xtls/xray-core/transport/internet/headers/wireguard"
+	// Legacy finalmask/header/{srtp,utp,wechat,wireguard} were removed upstream
+	// (replaced by the mkcp-legacy finalmask, wired directly via infra/conf).
 
 	// JSON & TOML & YAML
 	_ "github.com/xtls/xray-core/main/json"
