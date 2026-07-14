@@ -53,6 +53,7 @@ This project is maintained as a personal learning and development effort. No war
 
 ## Supported Panels
 
+<<<<<<< HEAD
 | Panel | V2Ray | Trojan | Shadowsocks |
 |---|---|---|---|
 | sspanel-uim | √ | √ | √ (single-port multi-user and V2Ray-Plugin) |
@@ -62,6 +63,17 @@ This project is maintained as a personal learning and development effort. No war
 | [WHMCS (V2RaySocks)](https://v2raysocks.doxtex.com/) | √ | √ | √ |
 | [GoV2Panel](https://github.com/pingProMax/gov2panel) | √ | √ | √ |
 | [BunPanel](https://github.com/pennyMorant/bunpanel-release) | √ | √ | √ |
+=======
+| Panel                                                     | v2ray | trojan | shadowsocks             |
+|--------------------------------------------------------|-------|--------|-------------------------|
+| sspanel-uim                                            | √     | √      | √ (Single-ended multi-user and V2Ray-Plugin) |
+| v2board                                                | √     | √      | √                       |
+| [PMPanel](https://github.com/ByteInternetHK/PMPanel)   | √     | √      | √                       |
+| [ProxyPanel](https://github.com/ProxyPanel/ProxyPanel) | √     | √      | √                       |
+| [WHMCS (V2RaySocks)](https://v2raysocks.doxtex.com/)   | √     | √      | √                       |
+| [BunPanel](https://github.com/pennyMorant/bunpanel-release)   | √     | √      | √                       |
+| [Xboard](https://github.com/cedar2025/Xboard)          | √     | √      | √                       |
+>>>>>>> c6b9a8db (Add Xboard panel compatibility)
 
 ## Installation
 
@@ -100,6 +112,9 @@ wget -N https://raw.githubusercontent.com/XrayR-Core/XrayR-release/master/instal
 
 [XrayR Channel](https://t.me/XrayR_channel)
 
+<<<<<<< HEAD
 ## Stargazers Over Time
 
 [![Stargazers over time](https://starchart.cc/XrayR-Core/XrayR.svg)](https://starchart.cc/XrayR-Core/XrayR)
+=======
+>>>>>>> c6b9a8db (Add Xboard panel compatibility)

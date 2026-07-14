@@ -15,6 +15,7 @@ import (
 	"github.com/xtls/xray-core/core"
 	"github.com/xtls/xray-core/infra/conf"
 
+<<<<<<< HEAD
 	"github.com/XrayR-Core/XrayR/api"
 	"github.com/XrayR-Core/XrayR/api/bunpanel"
 	"github.com/XrayR-Core/XrayR/api/gov2panel"
@@ -27,6 +28,21 @@ import (
 	_ "github.com/XrayR-Core/XrayR/cmd/distro/all"
 	"github.com/XrayR-Core/XrayR/service"
 	"github.com/XrayR-Core/XrayR/service/controller"
+=======
+	"github.com/XrayR-Core/XrayR/api"
+	"github.com/XrayR-Core/XrayR/api/bunpanel"
+	"github.com/XrayR-Core/XrayR/api/gov2panel"
+	"github.com/XrayR-Core/XrayR/api/newV2board"
+	"github.com/XrayR-Core/XrayR/api/pmpanel"
+	"github.com/XrayR-Core/XrayR/api/proxypanel"
+	"github.com/XrayR-Core/XrayR/api/sspanel"
+	"github.com/XrayR-Core/XrayR/api/v2raysocks"
+	"github.com/XrayR-Core/XrayR/api/xboard"
+	"github.com/XrayR-Core/XrayR/app/mydispatcher"
+	_ "github.com/XrayR-Core/XrayR/cmd/distro/all"
+	"github.com/XrayR-Core/XrayR/service"
+	"github.com/XrayR-Core/XrayR/service/controller"
+>>>>>>> c6b9a8db (Add Xboard panel compatibility)
 )
 
 // Panel Structure
@@ -190,6 +206,8 @@ func (p *Panel) Start() {
 			apiClient = gov2panel.New(nodeConfig.ApiConfig)
 		case "BunPanel":
 			apiClient = bunpanel.New(nodeConfig.ApiConfig)
+		case "Xboard":
+			apiClient = xboard.New(nodeConfig.ApiConfig)
 		default:
 			log.Panicf("Unsupport panel type: %s", nodeConfig.PanelType)
 		}
