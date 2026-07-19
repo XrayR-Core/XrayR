@@ -16,7 +16,7 @@ If you find this project useful, please consider giving it a `star` and `watch`.
 
 ## Documentation
 
-Detailed guide: [XrayR Documentation](https://xrayr-project.github.io/XrayR-doc/)
+Detailed guide: [XrayR Documentation](https://xrayr-Core.github.io/XrayR-doc/)
 
 ## Disclaimer
 
@@ -73,15 +73,15 @@ wget -N https://raw.githubusercontent.com/XrayR-Core/XrayR-release/master/instal
 
 ### Docker
 
-[Docker deployment tutorial](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
+[Docker deployment tutorial](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
 
 ### Manual install
 
-[Manual installation tutorial](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
+[Manual installation tutorial](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
 
 ## Configuration and Usage
 
-[Detailed tutorial](https://xrayr-project.github.io/XrayR-doc/)
+[Detailed tutorial](https://xrayr-Core.github.io/XrayR-doc/)
 
 ## Acknowledgements
 

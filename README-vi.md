@@ -17,7 +17,7 @@ Khung trở lại dựa trên XRay hỗ trợ các giao thức V2ay, Trojan, Sha
 Nếu bạn thích dự án này, bạn có thể nhấp vào Star+Watch ở góc trên bên phải để tiếp tục chú ý đến tiến trình của dự án này.
 
 ## Tài liệu
-Sử dụng hướng dẫn: [Hướng dẫn chi tiết](https://xrayr-project.github.io/XrayR-doc/) ( Tiếng Trung )
+Sử dụng hướng dẫn: [Hướng dẫn chi tiết](https://xrayr-Core.github.io/XrayR-doc/) ( Tiếng Trung )
 
 ## Tuyên bố miễn trừ
 
@@ -73,15 +73,15 @@ wget -N https://raw.githubusercontent.com/XrayR-Core/XrayR-release/master/instal
 
 ### Sử dụng phần mềm triển khai Docker
 
-[Hướng dẫn cài đặt thông qua Docker](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
+[Hướng dẫn cài đặt thông qua Docker](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
 
 ### Hướng dẫn cài đặt
 
-[Hướng dẫn cài đặt thủ công](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
+[Hướng dẫn cài đặt thủ công](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
 
 ## Tệp cấu hình và hướng dẫn sử dụng chi tiết
 
-[Hướng dẫn chi tiết](https://xrayr-project.github.io/XrayR-doc/)
+[Hướng dẫn chi tiết](https://xrayr-Core.github.io/XrayR-doc/)
 
 ## Thanks
 
