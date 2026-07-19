@@ -186,7 +186,7 @@ func (d *DefaultDispatcher) WrapLink(ctx context.Context, link *transport.Link) 
 	}
 
 	// Delegate to the embedded official dispatcher's WrapLink for stats handling
-	return d.DefaultDispatcher.WrapLink(ctx, link)
+	return link
 }
 
 func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *transport.Link, error) {
@@ -233,7 +233,7 @@ func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *tran
 		p := d.policy.ForLevel(user.Level)
 		if p.Stats.UserUplink {
 			name := "user>>>" + user.Email + ">>>traffic>>>uplink"
-			if c, _ := d.stats.GetOrRegisterCounter(name); c != nil {
+			if c, _ := stats.GetOrRegisterCounter(d.stats, name); c != nil {
 				inboundLink.Writer = &SizeStatWriter{
 					Counter: c,
 					Writer:  inboundLink.Writer,
@@ -242,7 +242,7 @@ func (d *DefaultDispatcher) getLink(ctx context.Context) (*transport.Link, *tran
 		}
 		if p.Stats.UserDownlink {
 			name := "user>>>" + user.Email + ">>>traffic>>>downlink"
-			if c, _ := d.stats.GetOrRegisterCounter(name); c != nil {
+			if c, _ := stats.GetOrRegisterCounter(d.stats, name); c != nil {
 				outboundLink.Writer = &SizeStatWriter{
 					Counter: c,
 					Writer:  outboundLink.Writer,
