@@ -16,7 +16,7 @@
 
 اگر این پروژه را دوست دارید، می توانید با کلیک بر روی ستاره+ساعت در گوشه بالا سمت راست به ادامه روند پیشرفت این پروژه توجه کنید.
 
-آموزش：[اموزش با جزئیات](https://xrayr-project.github.io/XrayR-doc/)
+آموزش：[اموزش با جزئیات](https://xrayr-Core.github.io/XrayR-doc/)
 
 ## سلب مسئولیت
 
@@ -71,15 +71,15 @@ wget -N https://raw.githubusercontent.com/XrayR-Core/XrayR-release/master/instal
 
 ### استقرار نرم افزار با استفاده از Docker
 
-[آموزش استقرار داکر](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
+[آموزش استقرار داکر](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/docker)
 
 ### نصب دستی
 
-[آموزش نصب دستی](https://xrayr-project.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
+[آموزش نصب دستی](https://xrayr-Core.github.io/XrayR-doc/xrayr-xia-zai-he-an-zhuang/install/manual)
 
 ## فایل های پیکربندی و آموزش های با جرئیات
 
-[آموزش مفصل](https://xrayr-project.github.io/XrayR-doc/)
+[آموزش مفصل](https://xrayr-Core.github.io/XrayR-doc/)
 
 ## Thanks
 
