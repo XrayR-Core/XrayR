@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC.
+// Copyright 2025 Google LLC.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -57,11 +57,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/googleapis/gax-go/v2/internallog"
 	googleapi "google.golang.org/api/googleapi"
 	internal "google.golang.org/api/internal"
 	gensupport "google.golang.org/api/internal/gensupport"
@@ -85,6 +87,7 @@ var _ = strings.Replace
 var _ = context.Canceled
 var _ = internaloption.WithDefaultEndpoint
 var _ = internal.Version
+var _ = internallog.New
 
 const apiId = "acmedns:v1"
 const apiName = "acmedns"
@@ -92,19 +95,19 @@ const apiVersion = "v1"
 const basePath = "https://acmedns.googleapis.com/"
 const basePathTemplate = "https://acmedns.UNIVERSE_DOMAIN/"
 const mtlsBasePath = "https://acmedns.mtls.googleapis.com/"
-const defaultUniverseDomain = "googleapis.com"
 
 // NewService creates a new Service.
 func NewService(ctx context.Context, opts ...option.ClientOption) (*Service, error) {
 	opts = append(opts, internaloption.WithDefaultEndpoint(basePath))
 	opts = append(opts, internaloption.WithDefaultEndpointTemplate(basePathTemplate))
 	opts = append(opts, internaloption.WithDefaultMTLSEndpoint(mtlsBasePath))
-	opts = append(opts, internaloption.WithDefaultUniverseDomain(defaultUniverseDomain))
+	opts = append(opts, internaloption.EnableNewAuthLibrary())
 	client, endpoint, err := htransport.NewClient(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}
-	s, err := New(client)
+	s := &Service{client: client, BasePath: basePath, logger: internaloption.GetLogger(opts)}
+	s.AcmeChallengeSets = NewAcmeChallengeSetsService(s)
 	if err != nil {
 		return nil, err
 	}
@@ -123,13 +126,12 @@ func New(client *http.Client) (*Service, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
-	s := &Service{client: client, BasePath: basePath}
-	s.AcmeChallengeSets = NewAcmeChallengeSetsService(s)
-	return s, nil
+	return NewService(context.TODO(), option.WithHTTPClient(client))
 }
 
 type Service struct {
 	client    *http.Client
+	logger    *slog.Logger
 	BasePath  string // API endpoint base URL
 	UserAgent string // optional additional User-Agent fragment
 
@@ -152,131 +154,103 @@ type AcmeChallengeSetsService struct {
 	s *Service
 }
 
-// AcmeChallengeSet: The up-to-date ACME challenge set on a domain for
-// an RPC. This contains all of the ACME TXT records that exist on the
-// domain.
+// AcmeChallengeSet: The up-to-date ACME challenge set on a domain for an RPC.
+// This contains all of the ACME TXT records that exist on the domain.
 type AcmeChallengeSet struct {
 	// Record: The ACME challenges on the requested domain represented as
 	// individual TXT records.
 	Record []*AcmeTxtRecord `json:"record,omitempty"`
 
-	// ServerResponse contains the HTTP response code and headers from the
-	// server.
+	// ServerResponse contains the HTTP response code and headers from the server.
 	googleapi.ServerResponse `json:"-"`
-
-	// ForceSendFields is a list of field names (e.g. "Record") to
-	// unconditionally include in API requests. By default, fields with
-	// empty or default values are omitted from API requests. However, any
-	// non-pointer, non-interface field appearing in ForceSendFields will be
-	// sent to the server regardless of whether the field is empty or not.
-	// This may be used to include empty fields in Patch requests.
+	// ForceSendFields is a list of field names (e.g. "Record") to unconditionally
+	// include in API requests. By default, fields with empty or default values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
 	ForceSendFields []string `json:"-"`
-
 	// NullFields is a list of field names (e.g. "Record") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
+	// requests with the JSON null value. By default, fields with empty values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
 	NullFields []string `json:"-"`
 }
 
-func (s *AcmeChallengeSet) MarshalJSON() ([]byte, error) {
+func (s AcmeChallengeSet) MarshalJSON() ([]byte, error) {
 	type NoMethod AcmeChallengeSet
-	raw := NoMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(NoMethod(s), s.ForceSendFields, s.NullFields)
 }
 
 // AcmeTxtRecord: The TXT record message that represents an ACME DNS-01
 // challenge.
 type AcmeTxtRecord struct {
-	// Digest: Holds the ACME challenge data put in the TXT record. This
-	// will be checked to be a valid TXT record data entry.
+	// Digest: Holds the ACME challenge data put in the TXT record. This will be
+	// checked to be a valid TXT record data entry.
 	Digest string `json:"digest,omitempty"`
-
-	// Fqdn: The domain/subdomain for the record. In a request, this MAY be
-	// Unicode or Punycode. In a response, this will be in Unicode. The fqdn
-	// MUST contain the root_domain field on the request.
+	// Fqdn: The domain/subdomain for the record. In a request, this MAY be Unicode
+	// or Punycode. In a response, this will be in Unicode. The fqdn MUST contain
+	// the root_domain field on the request.
 	Fqdn string `json:"fqdn,omitempty"`
-
-	// UpdateTime: Output only. The time when this record was last updated.
-	// This will be in UTC time.
+	// UpdateTime: Output only. The time when this record was last updated. This
+	// will be in UTC time.
 	UpdateTime string `json:"updateTime,omitempty"`
-
-	// ForceSendFields is a list of field names (e.g. "Digest") to
-	// unconditionally include in API requests. By default, fields with
-	// empty or default values are omitted from API requests. However, any
-	// non-pointer, non-interface field appearing in ForceSendFields will be
-	// sent to the server regardless of whether the field is empty or not.
-	// This may be used to include empty fields in Patch requests.
+	// ForceSendFields is a list of field names (e.g. "Digest") to unconditionally
+	// include in API requests. By default, fields with empty or default values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
 	ForceSendFields []string `json:"-"`
-
 	// NullFields is a list of field names (e.g. "Digest") to include in API
-	// requests with the JSON null value. By default, fields with empty
-	// values are omitted from API requests. However, any field with an
-	// empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
+	// requests with the JSON null value. By default, fields with empty values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
 	NullFields []string `json:"-"`
 }
 
-func (s *AcmeTxtRecord) MarshalJSON() ([]byte, error) {
+func (s AcmeTxtRecord) MarshalJSON() ([]byte, error) {
 	type NoMethod AcmeTxtRecord
-	raw := NoMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(NoMethod(s), s.ForceSendFields, s.NullFields)
 }
 
-// RotateChallengesRequest: The request message for the RotateChallenges
-// RPC. Requires an access token, a root domain, and either
-// records_to_add or records_to_remove to be populated. Records may be
-// set for multiple subdomains at once to support SAN requests for
-// multiple subdomains in a single domain. By default, ACME TXT record
-// challenges that are older than 30 days will be removed. Set
-// `keep_expired_records` to false if this behavior is undesired. There
-// is a record maximum of 100 records per domain including expired
-// records. Any request sent that would exceed this maximum will result
+// RotateChallengesRequest: The request message for the RotateChallenges RPC.
+// Requires an access token, a root domain, and either records_to_add or
+// records_to_remove to be populated. Records may be set for multiple
+// subdomains at once to support SAN requests for multiple subdomains in a
+// single domain. By default, ACME TXT record challenges that are older than 30
+// days will be removed. Set `keep_expired_records` to false if this behavior
+// is undesired. There is a record maximum of 100 records per domain including
+// expired records. Any request sent that would exceed this maximum will result
 // in a FAILED_PRECONDITION error. NEXT ID: 6
 type RotateChallengesRequest struct {
-	// AccessToken: Required. ACME DNS access token. This is a base64 token
-	// secret that is procured from the Google Domains website. It
-	// authorizes ACME TXT record updates for a domain.
+	// AccessToken: Required. ACME DNS access token. This is a base64 token secret
+	// that is procured from the Google Domains website. It authorizes ACME TXT
+	// record updates for a domain.
 	AccessToken string `json:"accessToken,omitempty"`
-
-	// KeepExpiredRecords: Keep records older than 30 days that were used
-	// for previous requests.
+	// KeepExpiredRecords: Keep records older than 30 days that were used for
+	// previous requests.
 	KeepExpiredRecords bool `json:"keepExpiredRecords,omitempty"`
-
 	// RecordsToAdd: ACME TXT record challenges to add. Supports multiple
 	// challenges on the same FQDN.
 	RecordsToAdd []*AcmeTxtRecord `json:"recordsToAdd,omitempty"`
-
 	// RecordsToRemove: ACME TXT record challenges to remove.
 	RecordsToRemove []*AcmeTxtRecord `json:"recordsToRemove,omitempty"`
-
 	// ForceSendFields is a list of field names (e.g. "AccessToken") to
-	// unconditionally include in API requests. By default, fields with
-	// empty or default values are omitted from API requests. However, any
-	// non-pointer, non-interface field appearing in ForceSendFields will be
-	// sent to the server regardless of whether the field is empty or not.
-	// This may be used to include empty fields in Patch requests.
+	// unconditionally include in API requests. By default, fields with empty or
+	// default values are omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-ForceSendFields for more
+	// details.
 	ForceSendFields []string `json:"-"`
-
-	// NullFields is a list of field names (e.g. "AccessToken") to include
-	// in API requests with the JSON null value. By default, fields with
-	// empty values are omitted from API requests. However, any field with
-	// an empty value appearing in NullFields will be sent to the server as
-	// null. It is an error if a field in this list has a non-empty value.
-	// This may be used to include null fields in Patch requests.
+	// NullFields is a list of field names (e.g. "AccessToken") to include in API
+	// requests with the JSON null value. By default, fields with empty values are
+	// omitted from API requests. See
+	// https://pkg.go.dev/google.golang.org/api#hdr-NullFields for more details.
 	NullFields []string `json:"-"`
 }
 
-func (s *RotateChallengesRequest) MarshalJSON() ([]byte, error) {
+func (s RotateChallengesRequest) MarshalJSON() ([]byte, error) {
 	type NoMethod RotateChallengesRequest
-	raw := NoMethod(*s)
-	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+	return gensupport.MarshalJSON(NoMethod(s), s.ForceSendFields, s.NullFields)
 }
-
-// method id "acmedns.acmeChallengeSets.get":
 
 type AcmeChallengeSetsGetCall struct {
 	s            *Service
@@ -287,13 +261,12 @@ type AcmeChallengeSetsGetCall struct {
 	header_      http.Header
 }
 
-// Get: Gets the ACME challenge set for a given domain name. Domain
-// names must be provided in Punycode.
+// Get: Gets the ACME challenge set for a given domain name. Domain names must
+// be provided in Punycode.
 //
-//   - rootDomain: SLD + TLD domain name to list challenges. For example,
-//     this would be "google.com" for any FQDN under "google.com". That
-//     includes challenges for "subdomain.google.com". This MAY be Unicode
-//     or Punycode.
+//   - rootDomain: SLD + TLD domain name to list challenges. For example, this
+//     would be "google.com" for any FQDN under "google.com". That includes
+//     challenges for "subdomain.google.com". This MAY be Unicode or Punycode.
 func (r *AcmeChallengeSetsService) Get(rootDomain string) *AcmeChallengeSetsGetCall {
 	c := &AcmeChallengeSetsGetCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.rootDomain = rootDomain
@@ -301,33 +274,29 @@ func (r *AcmeChallengeSetsService) Get(rootDomain string) *AcmeChallengeSetsGetC
 }
 
 // Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
 func (c *AcmeChallengeSetsGetCall) Fields(s ...googleapi.Field) *AcmeChallengeSetsGetCall {
 	c.urlParams_.Set("fields", googleapi.CombineFields(s))
 	return c
 }
 
-// IfNoneMatch sets the optional parameter which makes the operation
-// fail if the object's ETag matches the given value. This is useful for
-// getting updates only after the object has changed since the last
-// request. Use googleapi.IsNotModified to check whether the response
-// error from Do is the result of In-None-Match.
+// IfNoneMatch sets an optional parameter which makes the operation fail if the
+// object's ETag matches the given value. This is useful for getting updates
+// only after the object has changed since the last request.
 func (c *AcmeChallengeSetsGetCall) IfNoneMatch(entityTag string) *AcmeChallengeSetsGetCall {
 	c.ifNoneMatch_ = entityTag
 	return c
 }
 
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
+// Context sets the context to be used in this call's Do method.
 func (c *AcmeChallengeSetsGetCall) Context(ctx context.Context) *AcmeChallengeSetsGetCall {
 	c.ctx_ = ctx
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
 func (c *AcmeChallengeSetsGetCall) Header() http.Header {
 	if c.header_ == nil {
 		c.header_ = make(http.Header)
@@ -336,21 +305,15 @@ func (c *AcmeChallengeSetsGetCall) Header() http.Header {
 }
 
 func (c *AcmeChallengeSetsGetCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/"+internal.Version)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "", c.header_)
 	if c.ifNoneMatch_ != "" {
 		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
 	}
-	var body io.Reader = nil
 	c.urlParams_.Set("alt", alt)
 	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/acmeChallengeSets/{rootDomain}")
 	urls += "?" + c.urlParams_.Encode()
-	req, err := http.NewRequest("GET", urls, body)
+	req, err := http.NewRequest("GET", urls, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -358,16 +321,16 @@ func (c *AcmeChallengeSetsGetCall) doRequest(alt string) (*http.Response, error)
 	googleapi.Expand(req.URL, map[string]string{
 		"rootDomain": c.rootDomain,
 	})
+	c.s.logger.DebugContext(c.ctx_, "api request", "serviceName", apiName, "rpcName", "acmedns.acmeChallengeSets.get", "request", internallog.HTTPRequest(req, nil))
 	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "acmedns.acmeChallengeSets.get" call.
-// Exactly one of *AcmeChallengeSet or error will be non-nil. Any
-// non-2xx status code is an error. Response headers are in either
-// *AcmeChallengeSet.ServerResponse.Header or (if a response was
-// returned at all) in error.(*googleapi.Error).Header. Use
-// googleapi.IsNotModified to check whether the returned error was
-// because http.StatusNotModified was returned.
+// Any non-2xx status code is an error. Response headers are in either
+// *AcmeChallengeSet.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified was
+// returned.
 func (c *AcmeChallengeSetsGetCall) Do(opts ...googleapi.CallOption) (*AcmeChallengeSet, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
@@ -394,35 +357,13 @@ func (c *AcmeChallengeSetsGetCall) Do(opts ...googleapi.CallOption) (*AcmeChalle
 		},
 	}
 	target := &ret
-	if err := gensupport.DecodeResponse(target, res); err != nil {
+	b, err := gensupport.DecodeResponseBytes(target, res)
+	if err != nil {
 		return nil, err
 	}
+	c.s.logger.DebugContext(c.ctx_, "api response", "serviceName", apiName, "rpcName", "acmedns.acmeChallengeSets.get", "response", internallog.HTTPResponse(res, b))
 	return ret, nil
-	// {
-	//   "description": "Gets the ACME challenge set for a given domain name. Domain names must be provided in Punycode.",
-	//   "flatPath": "v1/acmeChallengeSets/{rootDomain}",
-	//   "httpMethod": "GET",
-	//   "id": "acmedns.acmeChallengeSets.get",
-	//   "parameterOrder": [
-	//     "rootDomain"
-	//   ],
-	//   "parameters": {
-	//     "rootDomain": {
-	//       "description": "Required. SLD + TLD domain name to list challenges. For example, this would be \"google.com\" for any FQDN under \"google.com\". That includes challenges for \"subdomain.google.com\". This MAY be Unicode or Punycode.",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "v1/acmeChallengeSets/{rootDomain}",
-	//   "response": {
-	//     "$ref": "AcmeChallengeSet"
-	//   }
-	// }
-
 }
-
-// method id "acmedns.acmeChallengeSets.rotateChallenges":
 
 type AcmeChallengeSetsRotateChallengesCall struct {
 	s                       *Service
@@ -433,14 +374,13 @@ type AcmeChallengeSetsRotateChallengesCall struct {
 	header_                 http.Header
 }
 
-// RotateChallenges: Rotate the ACME challenges for a given domain name.
-// By default, removes any challenges that are older than 30 days.
-// Domain names must be provided in Punycode.
+// RotateChallenges: Rotate the ACME challenges for a given domain name. By
+// default, removes any challenges that are older than 30 days. Domain names
+// must be provided in Punycode.
 //
-//   - rootDomain: SLD + TLD domain name to update records for. For
-//     example, this would be "google.com" for any FQDN under
-//     "google.com". That includes challenges for "subdomain.google.com".
-//     This MAY be Unicode or Punycode.
+//   - rootDomain: SLD + TLD domain name to update records for. For example, this
+//     would be "google.com" for any FQDN under "google.com". That includes
+//     challenges for "subdomain.google.com". This MAY be Unicode or Punycode.
 func (r *AcmeChallengeSetsService) RotateChallenges(rootDomain string, rotatechallengesrequest *RotateChallengesRequest) *AcmeChallengeSetsRotateChallengesCall {
 	c := &AcmeChallengeSetsRotateChallengesCall{s: r.s, urlParams_: make(gensupport.URLParams)}
 	c.rootDomain = rootDomain
@@ -449,23 +389,21 @@ func (r *AcmeChallengeSetsService) RotateChallenges(rootDomain string, rotatecha
 }
 
 // Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
+// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse for more
+// details.
 func (c *AcmeChallengeSetsRotateChallengesCall) Fields(s ...googleapi.Field) *AcmeChallengeSetsRotateChallengesCall {
 	c.urlParams_.Set("fields", googleapi.CombineFields(s))
 	return c
 }
 
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
+// Context sets the context to be used in this call's Do method.
 func (c *AcmeChallengeSetsRotateChallengesCall) Context(ctx context.Context) *AcmeChallengeSetsRotateChallengesCall {
 	c.ctx_ = ctx
 	return c
 }
 
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
+// Header returns a http.Header that can be modified by the caller to add
+// headers to the request.
 func (c *AcmeChallengeSetsRotateChallengesCall) Header() http.Header {
 	if c.header_ == nil {
 		c.header_ = make(http.Header)
@@ -474,18 +412,11 @@ func (c *AcmeChallengeSetsRotateChallengesCall) Header() http.Header {
 }
 
 func (c *AcmeChallengeSetsRotateChallengesCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	reqHeaders.Set("x-goog-api-client", "gl-go/"+gensupport.GoVersion()+" gdcl/"+internal.Version)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	var body io.Reader = nil
-	body, err := googleapi.WithoutDataWrapper.JSONReader(c.rotatechallengesrequest)
+	reqHeaders := gensupport.SetHeaders(c.s.userAgent(), "application/json", c.header_)
+	body, err := googleapi.WithoutDataWrapper.JSONBuffer(c.rotatechallengesrequest)
 	if err != nil {
 		return nil, err
 	}
-	reqHeaders.Set("Content-Type", "application/json")
 	c.urlParams_.Set("alt", alt)
 	c.urlParams_.Set("prettyPrint", "false")
 	urls := googleapi.ResolveRelative(c.s.BasePath, "v1/acmeChallengeSets/{rootDomain}:rotateChallenges")
@@ -498,16 +429,16 @@ func (c *AcmeChallengeSetsRotateChallengesCall) doRequest(alt string) (*http.Res
 	googleapi.Expand(req.URL, map[string]string{
 		"rootDomain": c.rootDomain,
 	})
+	c.s.logger.DebugContext(c.ctx_, "api request", "serviceName", apiName, "rpcName", "acmedns.acmeChallengeSets.rotateChallenges", "request", internallog.HTTPRequest(req, body.Bytes()))
 	return gensupport.SendRequest(c.ctx_, c.s.client, req)
 }
 
 // Do executes the "acmedns.acmeChallengeSets.rotateChallenges" call.
-// Exactly one of *AcmeChallengeSet or error will be non-nil. Any
-// non-2xx status code is an error. Response headers are in either
-// *AcmeChallengeSet.ServerResponse.Header or (if a response was
-// returned at all) in error.(*googleapi.Error).Header. Use
-// googleapi.IsNotModified to check whether the returned error was
-// because http.StatusNotModified was returned.
+// Any non-2xx status code is an error. Response headers are in either
+// *AcmeChallengeSet.ServerResponse.Header or (if a response was returned at
+// all) in error.(*googleapi.Error).Header. Use googleapi.IsNotModified to
+// check whether the returned error was because http.StatusNotModified was
+// returned.
 func (c *AcmeChallengeSetsRotateChallengesCall) Do(opts ...googleapi.CallOption) (*AcmeChallengeSet, error) {
 	gensupport.SetOptions(c.urlParams_, opts...)
 	res, err := c.doRequest("json")
@@ -534,33 +465,10 @@ func (c *AcmeChallengeSetsRotateChallengesCall) Do(opts ...googleapi.CallOption)
 		},
 	}
 	target := &ret
-	if err := gensupport.DecodeResponse(target, res); err != nil {
+	b, err := gensupport.DecodeResponseBytes(target, res)
+	if err != nil {
 		return nil, err
 	}
+	c.s.logger.DebugContext(c.ctx_, "api response", "serviceName", apiName, "rpcName", "acmedns.acmeChallengeSets.rotateChallenges", "response", internallog.HTTPResponse(res, b))
 	return ret, nil
-	// {
-	//   "description": "Rotate the ACME challenges for a given domain name. By default, removes any challenges that are older than 30 days. Domain names must be provided in Punycode.",
-	//   "flatPath": "v1/acmeChallengeSets/{rootDomain}:rotateChallenges",
-	//   "httpMethod": "POST",
-	//   "id": "acmedns.acmeChallengeSets.rotateChallenges",
-	//   "parameterOrder": [
-	//     "rootDomain"
-	//   ],
-	//   "parameters": {
-	//     "rootDomain": {
-	//       "description": "Required. SLD + TLD domain name to update records for. For example, this would be \"google.com\" for any FQDN under \"google.com\". That includes challenges for \"subdomain.google.com\". This MAY be Unicode or Punycode.",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "v1/acmeChallengeSets/{rootDomain}:rotateChallenges",
-	//   "request": {
-	//     "$ref": "RotateChallengesRequest"
-	//   },
-	//   "response": {
-	//     "$ref": "AcmeChallengeSet"
-	//   }
-	// }
-
 }

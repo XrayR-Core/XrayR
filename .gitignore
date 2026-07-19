@@ -19,3 +19,12 @@ error.log
 cert
 config.yml
 EXAMPLE/
+
+# AI assistant metadata
+.claude/
+.gemini/
+.codex/
+.agents/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
